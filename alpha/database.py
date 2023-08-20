@@ -15,10 +15,6 @@ class AlphaDB:
             connect_info = json.load(info)
 
         self.conn = psycopg2.connect(**connect_info)
-    
-    
-    def __del__(self):
-        self.conn.close()
         
         
     def get_table_names(self):
