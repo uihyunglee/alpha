@@ -17,13 +17,15 @@ class AlphaDB:
         self.conn = psycopg2.connect(**connect_info)
         
         
-    def get_table_names(self):
+    def get_table_name(self):
+        """Return DB table name"""
         sql = "SELECT table_name FROM information_schema.tables WHERE table_schema='public';"
         table_name = pd.read_sql(sql, self.conn)
         return list(table_name.values.reshape(-1))
     
     
     def get_stock_data(self, table, code=None, start_date=None, end_date=None):
+        """Return stock data in table"""
         if start_date == None:
             start_date = '0'
         if end_date == None:
@@ -39,4 +41,4 @@ class AlphaDB:
         
         df = pd.read_sql(sql, self.conn)
         
-        return df
+        return df            
