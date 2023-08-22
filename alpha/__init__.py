@@ -1,2 +1,2 @@
-from database import AlphaDB
+from .database import AlphaDB
 
