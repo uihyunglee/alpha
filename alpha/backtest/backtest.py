@@ -12,5 +12,5 @@ plt.rcParams['axes.unicode_minus'] = False
 
 class Backtest:
     def __init__(self):
-        data_path = 'C:/Users/uhLee/data/'
+        pass
         
