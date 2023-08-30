@@ -9,6 +9,7 @@ plt.rcParams['axes.unicode_minus'] = False
 
 
 def get_rtn_data(rtn):
+    """Return cumulative prod and sum return and drawdown"""
     cumprod_rtn = (rtn + 1).cumprod() 
     cumprod_high = cumprod_rtn.cummax()
 
@@ -27,6 +28,7 @@ def get_rtn_data(rtn):
 
 
 def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=False, func='cumprod'):
+    """Show cumulative return of strategy, benchmark and benchmark price"""
     stg_rtn_data = get_rtn_data(strategy_rtn)
 
     fig, ax = plt.subplots(2, figsize = (15,8), gridspec_kw={'height_ratios': [2.5, 1], 'hspace':0.05}, sharex = True)
@@ -43,5 +45,5 @@ def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=False, func=
         bchmk_rtn_data[f'{func}_dd'].plot(ax=ax[1], grid=True, color = 'g', alpha=0.7);
 
     stg_rtn_data[f'{func}_rtn'].plot(ax=ax[0], title = '누적 복리 수익률', grid=True, label = 'Strategy', legend = True, color = 'b');
-    stg_rtn_data[f'{func}dd'].plot(ax=ax[1], grid=True, color = 'b');
+    stg_rtn_data[f'{func}_dd'].plot(ax=ax[1], grid=True, color = 'b');
     return None
