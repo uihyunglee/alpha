@@ -27,7 +27,7 @@ def get_rtn_data(rtn):
     return df
 
 
-def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=False, func='cumprod'):
+def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=None, func='cumprod'):
     """Show cumulative return of strategy, benchmark and benchmark price"""
     stg_rtn_data = get_rtn_data(strategy_rtn)
 
@@ -43,7 +43,55 @@ def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=False, func=
         bchmk_rtn_data = get_rtn_data(benchmark_rtn)
         bchmk_rtn_data[f'{func}_rtn'].plot(ax=ax[0], grid=True, label = 'Benchmark', legend = True, color = 'g', alpha=0.7)
         bchmk_rtn_data[f'{func}_dd'].plot(ax=ax[1], grid=True, color = 'g', alpha=0.7);
-
-    stg_rtn_data[f'{func}_rtn'].plot(ax=ax[0], title = '누적 복리 수익률', grid=True, label = 'Strategy', legend = True, color = 'b');
+    
+    title = '복리' if func=='cumprod' else '단리'
+    stg_rtn_data[f'{func}_rtn'].plot(ax=ax[0], title = f'누적 {title} 수익률', grid=True, label = 'Strategy', legend = True, color = 'b');
     stg_rtn_data[f'{func}_dd'].plot(ax=ax[1], grid=True, color = 'b');
+    return None
+
+
+def show_rtn_analysis(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
+    """Show total return analysis information (input daily return)"""
+    strategy_rtn = strategy_rtn.copy()
+    strategy_rtn = strategy_rtn.fillna(0)
+    
+    tot_days = strategy_rtn.index[-1] - strategy_rtn.index[0]
+    tot_days = tot_days.days
+    tot_op_days = strategy_rtn.resample('D').size().shape[0]
+    tot_yrs = tot_days / 365
+    
+    stg_rtn_data = get_rtn_data(strategy_rtn)
+    rtn_avg = strategy_rtn.mean()
+    rtn_std = strategy_rtn.std()  # 보수적 수치
+    sharpe = rtn_avg / rtn_std * np.sqrt(252)  # 코인의 경우 기간 조정 필요
+    
+    win_rate = (strategy_rtn > 0).sum() / strategy_rtn.shape[0]
+    win_avg_rtn = strategy_rtn[strategy_rtn > 0].mean()
+    lose_avg_rtn = strategy_rtn[strategy_rtn < 0].mean()
+
+    print('-'*50)
+    print(f'백테스트 기간: {strategy_rtn.index[0]} ~ {strategy_rtn.index[-1]}')
+    print(f"- 총 캘린더: {tot_days}일")
+    print(f"- 총 거래일: {tot_op_days}일")
+    print(f"- 총 연도: {tot_yrs:.2f}년")
+    print()
+    print(f"전체 기간 복리 수익률: {stg_rtn_data['cumprod_rtn'].iloc[-1]:.2%}")
+    print(f"전체 기간 단리 수익률: {stg_rtn_data['cumsum_rtn'].iloc[-1]:.2%}")
+    print(f"복리 최대 낙폭(MDD): {stg_rtn_data['cumprod_dd'].min():.2%}")
+    print(f"단리 최대 낙폭(MDD): {stg_rtn_data['cumsum_dd'].min():.2%}")
+    print(f"샤프 지수 (연율화): {sharpe:.2f}")
+    print()
+    print(f"연평균 복리 수익률: {(stg_rtn_data['cumprod_rtn'].iloc[-1] + 1)**(1 / tot_yrs) - 1:.2%}")
+    print(f"연평균 단리 수익률: {stg_rtn_data['cumsum_rtn'].iloc[-1] / tot_yrs:.2%}")
+    print(f"연평균 표준편차: {rtn_std * np.sqrt(252):.4}")
+    print()
+    print(f"일별 승률: {win_rate:.2%}")
+    print(f"일별 평균 수익률: {rtn_avg: .2%}")
+    print(f"일별 수익거래 수익률: {win_avg_rtn:.2%}")
+    print(f"일별 손실거래 손실률: {lose_avg_rtn:.2%}")
+    print(f"일별 손익비: {win_rate * (1 + win_avg_rtn / abs(lose_avg_rtn)):.2f}")
+    print('-'*50)
+    
+    show_rtn_plot(strategy_rtn, benchmark_rtn, benchmark_price, func='cumprod')
+    show_rtn_plot(strategy_rtn, benchmark_rtn, benchmark_price, func='cumsum')
     return None
