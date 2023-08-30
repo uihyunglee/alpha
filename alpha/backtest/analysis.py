@@ -26,7 +26,7 @@ def get_rtn_data(rtn):
     return df
 
 
-def show_cumprod_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
+def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=False, func='cumprod'):
     stg_rtn_data = get_rtn_data(strategy_rtn)
 
     fig, ax = plt.subplots(2, figsize = (15,8), gridspec_kw={'height_ratios': [2.5, 1], 'hspace':0.05}, sharex = True)
@@ -36,12 +36,12 @@ def show_cumprod_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
         benchmark_price_high = benchmark_price.cummax()
         benchmark_price_dd = benchmark_price / benchmark_price_high - 1
         benchmark_price_dd.plot(ax=ax[1], grid=True, color = 'black', alpha=0.5);
-        
+
     if isinstance(benchmark_rtn, pd.Series):
         bchmk_rtn_data = get_rtn_data(benchmark_rtn)
-        bchmk_rtn_data['cumprod_rtn'].plot(ax=ax[0], grid=True, label = 'Benchmark', legend = True, color = 'g', alpha=0.7)
-        bchmk_rtn_data['cumprod_dd'].plot(ax=ax[1], grid=True, color = 'g', alpha=0.7);
+        bchmk_rtn_data[f'{func}_rtn'].plot(ax=ax[0], grid=True, label = 'Benchmark', legend = True, color = 'g', alpha=0.7)
+        bchmk_rtn_data[f'{func}_dd'].plot(ax=ax[1], grid=True, color = 'g', alpha=0.7);
 
-    stg_rtn_data['cumprod_rtn'].plot(ax=ax[0], title = '누적 복리 수익률', grid=True, label = 'Strategy', legend = True, color = 'b');
-    stg_rtn_data['cumprod_dd'].plot(ax=ax[1], grid=True, color = 'b');
+    stg_rtn_data[f'{func}_rtn'].plot(ax=ax[0], title = '누적 복리 수익률', grid=True, label = 'Strategy', legend = True, color = 'b');
+    stg_rtn_data[f'{func}dd'].plot(ax=ax[1], grid=True, color = 'b');
     return None
