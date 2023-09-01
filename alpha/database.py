@@ -19,7 +19,7 @@ class AlphaDB:
         
     def get_table_names(self):
         """Return DB table name"""
-        sql = "SELECT table_name FROM information_schema.tables WHERE table_schema='public';"
+        sql = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
         table_name = pd.read_sql(sql, self.conn)
         return list(table_name.values.reshape(-1))
 
@@ -37,14 +37,16 @@ class AlphaDB:
         ohlcv_cond = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
         
         if code == None:
-            sql = f"""SELECT {ohlcv_cond} FROM {table} 
-                        WHERE {stock_cond} dateint BETWEEN '{start_date}' AND '{end_date}';
-                        """
+            sql = f"""
+            SELECT {ohlcv_cond} FROM {table} 
+            WHERE {stock_cond} dateint BETWEEN '{start_date}' AND '{end_date}'
+            """
         else:
             sh7code = f"('{code}')" if isinstance(code, str) else tuple(code)
-            sql = f"""SELECT {ohlcv_cond} FROM {table} 
-                        WHERE {stock_cond} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}');
-                        """
+            sql = f"""
+            SELECT {ohlcv_cond} FROM {table} 
+            WHERE {stock_cond} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
+            """
         df = pd.read_sql(sql, self.conn)
         return df
     
