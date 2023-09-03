@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import requests
 from io import BytesIO
+from datetime import datetime as dt
 
 
 def get_krx_content(self, otp_params):
@@ -17,13 +18,17 @@ def get_krx_content(self, otp_params):
     return df
 
 
-def krx_code():
-    url = 'https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13'
-    krx = pd.read_html(url, header=0)[0]
-    krx['종목코드'] = krx['종목코드'].map('A{:06d}'.format).values
-    krx.index = krx.pop('종목코드')
-    krx_codename = krx['회사명']
-    return krx_codename
+def get_code2name_dict(self):
+    """Return stock code-stock name from KRX (stocks currently listed)"""
+    today = dt.now().strftime('%Y%m%d')
+    otp_params = {
+        "mktId": "ALL",
+        "trdDd": today,
+        "url": "dbms/MDC/STAT/standard/MDCSTAT01501"
+    }
+    df = get_krx_content(otp_params)
+    code_to_company = pd.Series(index='A'+df['종목코드'], data=df['종목명'].values)
+    return dict(code_to_company)
 
 
 def condition_statistic(self, condition):
