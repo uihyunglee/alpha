@@ -64,6 +64,7 @@ def show_rtn_analysis(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
     rtn_avg = strategy_rtn.mean()
     rtn_std = strategy_rtn.std()  # 보수적 수치
     sharpe = rtn_avg / rtn_std * np.sqrt(252)  # 코인의 경우 기간 조정 필요
+    sortino = rtn_avg / np.sqrt((strategy_rtn[strategy_rtn < 0] ** 2).sum() / len(strategy_rtn)) * np.sqrt(252)
     
     win_rate = (strategy_rtn > 0).sum() / strategy_rtn.shape[0]
     win_avg_rtn = strategy_rtn[strategy_rtn > 0].mean()
@@ -79,7 +80,8 @@ def show_rtn_analysis(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
     print(f"전체 기간 단리 수익률: {stg_rtn_data['cumsum_rtn'].iloc[-1]:.2%}")
     print(f"복리 최대 낙폭(MDD): {stg_rtn_data['cumprod_dd'].min():.2%}")
     print(f"단리 최대 낙폭(MDD): {stg_rtn_data['cumsum_dd'].min():.2%}")
-    print(f"샤프 지수 (연율화): {sharpe:.2f}")
+    print(f"Sharpe Ratio: {sharpe:.2f}")
+    print(f"Sortino Ratio: {sortino:.2f}")
     print()
     print(f"연평균 복리 수익률: {(stg_rtn_data['cumprod_rtn'].iloc[-1] + 1)**(1 / tot_yrs) - 1:.2%}")
     print(f"연평균 단리 수익률: {stg_rtn_data['cumsum_rtn'].iloc[-1] / tot_yrs:.2%}")
