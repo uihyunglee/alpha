@@ -30,3 +30,47 @@ def get_code2name_dict():
     df = get_krx_content(otp_params)
     code_to_company = pd.Series(index='A'+df['종목코드'], data=df['종목명'].values)
     return dict(code_to_company)
+
+
+def get_index_info(index_name='KOSDAQ', start_date='20000101', end_date=dt.now().strftime('%Y%m%d')):
+    """
+    Return korea index information
+    
+    - index_name is 'KOSPI' or 'KOSPI200' or 'KOSDAQ' or 'KOSDAQ150'.
+    - return dataframe with columns ['date', 'open', 'high', 'low', 'close', 'vol', 'trd_val', 'mc'].
+    - if only_close is True, return close price series with date as index.
+    """
+    start_date = re.sub(r'[^0-9]', '', start_date)
+    end_date = re.sub(r'[^0-9]', '', end_date)
+    index_code = {
+        "KOSPI":"1001",
+        "KOSPI200": "1028",
+        "KOSDAQ": "2001",
+        "KOSDAQ150": "2203"
+    }
+    index_df = pd.DataFrame()
+    while start_date < end_date:
+        temp_start_date = str(int(end_date) - 10000)
+        if temp_start_date < start_date:
+            temp_start_date = start_date
+            
+        otp_params = {
+            "indIdx": index_code[index_name][0],
+            "indIdx2": index_code[index_name][1:],
+            "strtDd": temp_start_date,
+            "endDd": end_date,
+            "url": "dbms/MDC/STAT/standard/MDCSTAT00301"
+        }
+        temp_df = get_krx_content(otp_params)
+        index_df = pd.concat([index_df, temp_df], axis=0)
+        end_date = str(int(temp_start_date) - 1)
+        
+    kor_col = ['일자', '시가', '고가', '저가', '종가', '거래량', '거래대금', '상장시가총액']
+    eng_col = ['date', 'open', 'high', 'low', 'close', 'vol', 'trd_val', 'mc']
+    index_df = index_df[kor_col].iloc[::-1,:]
+    index_df.columns = eng_col
+    index_df['date'] = pd.to_datetime(index_df['date'])
+    index_df.set_index('date', drop=True, inplace=True)
+    if only_close:
+        return index_df['close']
+    return index_df
