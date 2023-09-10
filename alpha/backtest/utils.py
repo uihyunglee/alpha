@@ -32,7 +32,7 @@ def get_code2name_dict():
     return dict(code_to_company)
 
 
-def get_index_info(index_name='KOSDAQ', start_date='20000101', end_date=dt.now().strftime('%Y%m%d')):
+def get_index_info(index_name='KOSDAQ', start_date='20000101', end_date=dt.now().strftime('%Y%m%d'), only_close=True):
     """
     Return korea index information
     
