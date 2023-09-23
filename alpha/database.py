@@ -16,13 +16,11 @@ class AlphaDB:
 
         self.conn = psycopg2.connect(**connect_info)
         
-        
     def get_table_names(self):
         """Return DB table name"""
         sql = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
         table_name = pd.read_sql(sql, self.conn)
         return list(table_name.values.reshape(-1))
-
         
     def get_stock_data(self, table, code=None, start_date=None, end_date=None, only_stock=False, only_ohlcv=False):
         """Return stock data in table"""
@@ -49,7 +47,6 @@ class AlphaDB:
             """
         df = pd.read_sql(sql, self.conn)
         return df
-    
     
     def trans_qis_daily_format(self, daily_df, only_ohlcv=False, only_stock=False):
         """Transform DB data format to QIS data format"""
