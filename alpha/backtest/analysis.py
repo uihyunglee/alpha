@@ -113,3 +113,43 @@ def show_rtn_analysis(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
     fig, ax = plt.subplots(2, figsize = (15,4+mh), gridspec_kw={'height_ratios': [4, mh], 'hspace':0.4})
     strategy_rtn.plot(ax=ax[0], title = '일별 수익률', grid=True, color = 'b');
     show_monthly_rtn_plot(strategy_rtn)
+    
+    
+def find_abnormal_rtn(rtn_df, threshold=0.1, detail = False, max_hist = 5, price_df=None):
+    """show date having abnormal return (detail: previous price, Price_df required)"""
+    if detail and (price_df is None):
+        raise Exception('If detail is True, price_df parameter required')
+    daily_rtn_na = rtn_df.mean(axis=0)
+    daily_rtn = daily_rtn_na.fillna(0)
+
+    def show_detail(pn_state):
+        if pn_state == 'postive':
+            abnormal_rtn = daily_rtn[daily_rtn > threshold]
+            print(f"일일 수익률 {threshold:.0%} 이상 날짜")
+        else:
+            abnormal_rtn = daily_rtn[daily_rtn < -threshold]
+            print(f"일일 손실률 {threshold:.0%} 이하 날짜")
+
+        print('-'*50)
+        print(abnormal_rtn)
+        print('-'*50)
+        print()
+
+        if detail:
+            for day_ in abnormal_rtn.index:
+                print('-'*50)
+                date = day_.strftime('%Y-%m-%d')
+                holdings = rtn_df.loc[:,day_].dropna().index
+                print(f"{date} : {abnormal_rtn.loc[day_]:.2%}")
+                print(f"보유 종목: {holdings.values}")
+                print('-'*50)
+                for sym in holdings:
+                    print(f'{sym}: {rtn_df.loc[sym,day_]:.2%}')
+                    print('-'*50)
+                    print(price_df.loc[sym,:day_].iloc[-max_hist:])
+                    print('-'*50)
+                print()
+            print()
+
+    show_detail('postive')
+    show_detail('negative')
