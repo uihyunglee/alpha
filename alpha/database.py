@@ -7,7 +7,7 @@ class AlphaDB:
     def __init__(self, info_path):
         """
         This class requires 'info_path'.
-        ex) 'C:/Users/Desktop/info.json'
+        ex) 'C:/Users/uhLee/data/alphaDB_info.json'
         
         json format: {"host":***, "user":***, "password":***, "dbname":***, "port":***}
         """
