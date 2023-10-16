@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 import requests
+import re
 from io import BytesIO
 from datetime import datetime as dt
 
 
-def get_krx_content(otp_params):
+def __get_krx_content(otp_params):
     """krx crawling format: Return data corresponding to otp_params"""
     header = {"User-Agent": "Mozilla/5.0"}
     otp_url = 'http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd'
@@ -27,7 +28,7 @@ def get_code2name_dict():
         "trdDd": today,
         "url": "dbms/MDC/STAT/standard/MDCSTAT01501"
     }
-    df = get_krx_content(otp_params)
+    df = __get_krx_content(otp_params)
     code_to_company = pd.Series(index='A'+df['종목코드'], data=df['종목명'].values)
     return dict(code_to_company)
 
@@ -61,7 +62,7 @@ def get_index_info(index_name='KOSDAQ', start_date='20000101', end_date=dt.now()
             "endDd": end_date,
             "url": "dbms/MDC/STAT/standard/MDCSTAT00301"
         }
-        temp_df = get_krx_content(otp_params)
+        temp_df = __get_krx_content(otp_params)
         index_df = pd.concat([index_df, temp_df], axis=0)
         end_date = str(int(temp_start_date) - 1)
         
