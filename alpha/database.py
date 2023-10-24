@@ -22,12 +22,8 @@ class AlphaDB:
         table_name = pd.read_sql(sql, self.conn)
         return list(table_name.values.reshape(-1))
         
-    def get_stock_data(self, table, code=None, start_date=None, end_date=None, only_stock=False, only_ohlcv=False):
+    def get_stock_data(self, table, code=None, start_date='0', end_date='3000_00_00', only_stock=False, only_ohlcv=False):
         """Return stock data in table"""
-        if start_date == None:
-            start_date = '0'
-        if end_date == None:
-            end_date = '3000_00_00'
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
         
@@ -40,7 +36,7 @@ class AlphaDB:
             WHERE {stock_cond} dateint BETWEEN '{start_date}' AND '{end_date}'
             """
         else:
-            sh7code = f"('{code}')" if isinstance(code, str) else tuple(code)
+            sh7code = f"'{code}'" if isinstance(code, str) else str(code)[1:-1]
             sql = f"""
             SELECT {ohlcv_cond} FROM {table} 
             WHERE {stock_cond} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
