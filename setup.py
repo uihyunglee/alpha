@@ -19,3 +19,6 @@ setup(
         "psycopg2",
     ],
 )
+
+# HOW TO INSTALL WITH PIP
+# pip install git+https://{YOUR_REMOTE_GIT_URL}
