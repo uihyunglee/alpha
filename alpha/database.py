@@ -45,7 +45,7 @@ class AlphaDB:
         stock_cond = "(sh7code LIKE 'A%') AND" if only_stock else ''
         ohlcv_cond = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
 
-        if code == None:
+        if code is None:
             sql = f"""
             SELECT {ohlcv_cond} FROM {table_name} 
             WHERE {stock_cond} dateint BETWEEN '{start_date}' AND '{end_date}'
