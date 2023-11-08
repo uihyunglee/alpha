@@ -7,7 +7,7 @@ setup(
     description='[SURI] Alpha-study library',
     author='uihyunglee,surfhawk',
     author_email='uihyunglee.tech@gmail.com',
-    url='https://gitlab.vsq.kr:5443/hh/hawkivelib_push',
+    url='https://github.com/uihyunglee/alpha',
     python_requires='>=3.7',
     include_package_data=True,
     package_data={
