@@ -50,26 +50,27 @@ class AlphaDB:
         table_name = pd.read_sql(sql, self.conn)
         return list(table_name.values.reshape(-1))
 
-    def get_stock_data(self, table_name: str, code=None, start_date='2023_01_01', end_date='3000_00_00',
-                       except_etn=False, only_ohlcv=False) -> pd.DataFrame:
+    def get_stock_data(self, table_name: str, code: str | List[str] = 'all', 
+                   start_date: str = '2023_01_01', end_date: str = '3000_00_00',
+                   except_etn: bool = False, only_ohlcv: bool = False) -> pd.DataFrame:
         """Return stock data in table"""
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
 
-        stock_cond = "(sh7code LIKE 'A%') AND" if except_etn else ''
-        ohlcv_cond = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
+        cond_not_etn = "(sh7code NOT LIKE 'Q%') AND" if except_etn else ''
+        cond_only_ohlcv = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
 
         if code is None:
             sql = f"""
-            SELECT {ohlcv_cond} FROM {table_name} 
-            WHERE {stock_cond} dateint BETWEEN '{start_date}' AND '{end_date}'
+            SELECT {cond_only_ohlcv} FROM {table_name} 
+            WHERE {cond_not_etn} dateint BETWEEN '{start_date}' AND '{end_date}'
             ;
             """
         else:
             sh7code = f"'{code}'" if isinstance(code, str) else str(code)[1:-1]
             sql = f"""
-            SELECT {ohlcv_cond} FROM {table_name} 
-            WHERE {stock_cond} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
+            SELECT {cond_only_ohlcv} FROM {table_name} 
+            WHERE {cond_not_etn} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
             ;
             """
         df = pd.read_sql(sql, self.conn)
