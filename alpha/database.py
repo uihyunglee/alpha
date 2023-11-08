@@ -2,20 +2,34 @@ import pandas as pd
 import psycopg2
 import json
 import re
+import os
+
 
 class AlphaDB:
-    def __init__(self, info_path):
+    def __init__(self, conn_info: str | dict, info_key: str = ''):
         """
         This class requires 'info_path'.
         ex) 'C:/Users/uhLee/data/alphaDB_info.json'
         
         json format: {"host":***, "user":***, "password":***, "dbname":***, "port":***}
         """
-        with open(info_path, "r") as info:
-            connect_info = json.load(info)
+        conn_kwargs = {}
+        if isinstance(conn_info, str):
+            if os.path.isfile(conn_info):
+                if conn_info.endswith('.json'):
+                    with open(conn_info, "r") as info:
+                        _info = json.load(info)
+                        conn_kwargs.update(_info[info_key] if info_key else _info)
+                elif conn_info.endswith('.yaml') or conn_info.endswith('.yml'):
+                    _info = {}  # todo: support yaml loading
+                    conn_kwargs.update(_info[info_key] if info_key else _info)
+        elif isinstance(conn_info, dict):
+            conn_kwargs = conn_info
+        else:
+            raise ValueError(f"conn_info must be existing file path str (.json or .yaml) or dict. not {type(conn_info)}")
 
-        self.conn = psycopg2.connect(**connect_info)
-        
+        self.conn = psycopg2.connect(**conn_kwargs)
+
     def get_table_names(self):
         """Return DB table name"""
         sql = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
