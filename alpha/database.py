@@ -57,22 +57,19 @@ class AlphaDB:
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
 
-        cond_not_etn = "(sh7code NOT LIKE 'Q%') AND" if except_etn else ''
+        code = code if isinstance(code, str) else str(code)[2:-2]
+
+        cond_code = f"AND sh7code IN ('{code}')" if code != 'all' else ''
+        cond_not_etn = "AND (sh7code NOT LIKE 'Q%')" if except_etn else ''
         cond_only_ohlcv = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
 
-        if code is None:
-            sql = f"""
-            SELECT {cond_only_ohlcv} FROM {table_name} 
-            WHERE {cond_not_etn} dateint BETWEEN '{start_date}' AND '{end_date}'
-            ;
-            """
-        else:
-            sh7code = f"'{code}'" if isinstance(code, str) else str(code)[1:-1]
-            sql = f"""
-            SELECT {cond_only_ohlcv} FROM {table_name} 
-            WHERE {cond_not_etn} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
-            ;
-            """
+        sql = f"""
+        SELECT {cond_only_ohlcv} FROM {table_name} 
+        WHERE dateint BETWEEN '{start_date}' AND '{end_date}'
+        {cond_not_etn}
+        {cond_code}
+        ;
+        """
         df = pd.read_sql(sql, self.conn)
         return df
 
