@@ -69,7 +69,7 @@ def show_rtn_analysis(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
     
     tot_days = strategy_rtn.index[-1] - strategy_rtn.index[0]
     tot_days = tot_days.days
-    tot_op_days = strategy_rtn.resample('D').size().shape[0]
+    tot_op_days = (strategy_rtn.resample('D').size() > 0).sum()
     tot_yrs = tot_days / 365
     
     stg_rtn_data = get_rtn_data(strategy_rtn)
