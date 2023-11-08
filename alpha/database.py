@@ -10,11 +10,19 @@ import os
 class AlphaDB:
     def __init__(self, conn_info: str | dict, info_key: str = ''):
         """
-        This class requires 'info_path'.
-        ex) 'C:/Users/uhLee/data/alphaDB_info.json'
-        
-        json format: {"host":***, "user":***, "password":***, "dbname":***, "port":***}
+        This class connects to remote DB with conn_info, creates connection, and prepares to fetch data.
+
+        Parameters
+        ----------
+        conn_info: filepath-str | dict
+            filepath-str must be existing file path (ends with .json or .yaml)
+            dict and loaded-dict from file must contain connection info with key and value as below.
+             1) PostgreSQL: host, port, user, password, dbname
+
+        info_key: (optional) str, default ''
+            If specified, use this key as cursor to fetch connection info from conn_info. (like dict[info_key])
         """
+
         conn_kwargs = {}
         if isinstance(conn_info, str):
             if os.path.isfile(conn_info):
