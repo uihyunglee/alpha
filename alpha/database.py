@@ -30,35 +30,37 @@ class AlphaDB:
 
         self.conn = psycopg2.connect(**conn_kwargs)
 
-    def get_table_names(self):
+    def get_table_names(self) -> list:
         """Return DB table name"""
         sql = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
         table_name = pd.read_sql(sql, self.conn)
         return list(table_name.values.reshape(-1))
-        
-    def get_stock_data(self, table, code=None, start_date='0', end_date='3000_00_00', only_stock=False, only_ohlcv=False):
+
+    def get_stock_data(self, table_name: str, code=None, start_date='0', end_date='3000_00_00', only_stock=False,
+                       only_ohlcv=False):
         """Return stock data in table"""
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
-        
+
         stock_cond = "(sh7code LIKE 'A%') AND" if only_stock else ''
         ohlcv_cond = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
-        
+
         if code == None:
             sql = f"""
-            SELECT {ohlcv_cond} FROM {table} 
+            SELECT {ohlcv_cond} FROM {table_name} 
             WHERE {stock_cond} dateint BETWEEN '{start_date}' AND '{end_date}'
             """
         else:
             sh7code = f"'{code}'" if isinstance(code, str) else str(code)[1:-1]
             sql = f"""
-            SELECT {ohlcv_cond} FROM {table} 
+            SELECT {ohlcv_cond} FROM {table_name} 
             WHERE {stock_cond} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
             """
         df = pd.read_sql(sql, self.conn)
         return df
-    
-    def trans_qis_daily_format(self, daily_df, only_ohlcv=False, only_stock=False):
+
+    @staticmethod
+    def trans_qis_daily_format(daily_df: pd.DataFrame, only_ohlcv: bool = False, only_stock: bool = False):
         """Transform DB data format to QIS data format"""
         if ('cddt' in daily_df.columns) or ('open' not in daily_df.columns):
             raise ValueError("You can only input daily data.")
@@ -78,6 +80,5 @@ class AlphaDB:
 
         for key in atf_keys:
             atf[key] = pd.pivot_table(data=df, values=key, index='symbol', columns='date')
-            
+
         return atf
-    
