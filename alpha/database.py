@@ -51,12 +51,14 @@ class AlphaDB:
             sql = f"""
             SELECT {ohlcv_cond} FROM {table_name} 
             WHERE {stock_cond} dateint BETWEEN '{start_date}' AND '{end_date}'
+            ;
             """
         else:
             sh7code = f"'{code}'" if isinstance(code, str) else str(code)[1:-1]
             sql = f"""
             SELECT {ohlcv_cond} FROM {table_name} 
             WHERE {stock_cond} (sh7code IN {sh7code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
+            ;
             """
         df = pd.read_sql(sql, self.conn)
         return df
