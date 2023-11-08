@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='alpha',
-    version='0.0.1',
+    version='0.0.2',
     description='[SURI] Alpha-study library',
     author='uihyunglee,surfhawk',
     author_email='uihyunglee.tech@gmail.com',
