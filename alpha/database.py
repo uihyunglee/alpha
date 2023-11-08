@@ -16,11 +16,11 @@ class AlphaDB:
         ----------
         conn_info: filepath-str | dict
             filepath-str must be existing file path (ends with .json or .yaml)
-            dict and loaded-dict from file must contain connection info with key and value as below.
+            dict or loaded-dict from file must contain connection info with key and value as below.
              1) PostgreSQL: host, port, user, password, dbname
 
         info_key: (optional) str, default ''
-            If specified, use this key as cursor to fetch connection info from conn_info. (like dict[info_key])
+            If specified, use this key to load connection info in conn_info[info_key]  (read subtree, not root)
         """
 
         conn_kwargs = {}
@@ -33,6 +33,10 @@ class AlphaDB:
                 elif conn_info.endswith('.yaml') or conn_info.endswith('.yml'):
                     _info = {}  # todo: support yaml loading
                     conn_kwargs.update(_info[info_key] if info_key else _info)
+                else:
+                    raise ValueError(f"not supported file type: {conn_info.split('.')[-1]}")
+            else:
+                raise FileNotFoundError(f"conn_info file not found: {conn_info}")
         elif isinstance(conn_info, dict):
             conn_kwargs = conn_info
         else:
