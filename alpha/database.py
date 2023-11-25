@@ -72,6 +72,18 @@ class AlphaDB:
         """
         df = pd.read_sql(sql, self.conn)
         return df
+    
+    def get_krx_closed_bday(self) -> List[str]:
+        """Return KRX closed days except weekends"""
+        with self.conn.cursor() as curs:
+            sql = f"""
+            SELECT json_data FROM common_jsonstore
+            WHERE key = 'krx_closed_bday_li'
+            ;
+            """
+            curs.execute(sql)
+            res = curs.fetchone()
+        return res[0]
 
     @staticmethod
     def trans_qis_daily_format(daily_df: pd.DataFrame, only_ohlcv: bool = False, filter_out_etn: bool = False,
