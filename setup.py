@@ -14,9 +14,13 @@ setup(
         'alpha': ['*', ]
     },
     install_requires=[
+        "setuptools",
         "numpy",
         "pandas",
         "psycopg2",
+        "requests",
+        "matplotlib",
+        "seaborn",
     ],
 )
 
