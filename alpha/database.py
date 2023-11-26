@@ -73,6 +73,21 @@ class AlphaDB:
         df = pd.read_sql(sql, self.conn)
         return df
     
+    def get_date_Ndays_ago(self, today: str, N: int) -> str:
+        """Return date Ndays ago"""
+        today = int(re.sub(r'[^0-9]', '', today))
+        with self.conn.cursor() as curs:
+            sql = f"""
+            SELECT DISTINCT dateint FROM cpstore_adjchart_daily
+            WHERE dateint < {today}
+            ORDER BY dateint DESC
+            LIMIT 1 OFFSET {N-1}
+            """
+            curs.execute(sql)
+            res = curs.fetchone()
+            date = str(res[0])
+            return f'{date[:4]}-{date[4:6]}-{date[6:]}'
+    
     def get_krx_closed_bday(self) -> List[str]:
         """Return KRX closed days except weekends"""
         with self.conn.cursor() as curs:
