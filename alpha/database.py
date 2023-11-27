@@ -1,4 +1,5 @@
 from typing import Dict, List
+from datetime import datetime as dt
 
 import pandas as pd
 import psycopg2
@@ -54,6 +55,8 @@ class AlphaDB:
                    start_date: str = '2023_01_01', end_date: str = '3000_00_00',
                    except_etn: bool = False, only_ohlcv: bool = False) -> pd.DataFrame:
         """Return stock data in table"""
+        start_date = start_date.strftime('%Y%m%d') if isinstance(start_date, dt) else start_date
+        end_date = end_date.strftime('%Y%m%d') if isinstance(end_date, dt) else end_date
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
 
@@ -75,6 +78,7 @@ class AlphaDB:
     
     def get_date_Ndays_ago(self, today: str, N: int) -> str:
         """Return date Ndays ago"""
+        today = today.strftime('%Y%m%d') if isinstance(today, dt) else today
         today = int(re.sub(r'[^0-9]', '', today))
         with self.conn.cursor() as curs:
             sql = f"""
