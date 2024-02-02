@@ -65,6 +65,7 @@ class AlphaDB:
         cond_code = f"AND sh7code IN ('{code}')" if code != 'all' else ''
         cond_not_etn = "AND (sh7code NOT LIKE 'Q%')" if except_etn else ''
         cond_only_ohlcv = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
+        cond_only_ohlcv = cond_only_ohlcv if table_name.split('_')[-1] == 'daily' else 'cddt,' + cond_only_ohlcv
 
         sql = f"""
         SELECT {cond_only_ohlcv} FROM {table_name} 
