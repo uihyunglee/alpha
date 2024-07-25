@@ -49,17 +49,18 @@ def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=None, func='
     
 
 def show_monthly_rtn_plot(stg_rtn):
+    stg_rtn.name = None
     monthly_df = pd.DataFrame(stg_rtn).copy()
     monthly_df['year'] = stg_rtn.index.year
     monthly_df['month'] = stg_rtn.index.month
 
-    monthly_rtn = monthly_df.groupby(['year','month'])[stg_rtn.name].apply(
+    monthly_rtn = monthly_df.groupby(['year','month'])[0].apply(
         lambda r: ((1+r).prod()-1)*100
     )
     monthly_rtn = pd.DataFrame(monthly_rtn)
 
     heat_df = pd.pivot_table(data=pd.DataFrame(monthly_rtn),
-                             values=stg_rtn.name,
+                             values=0,
                              index='year', columns='month')
     
     plt.title('월별 수익률 (복리 기준)')
