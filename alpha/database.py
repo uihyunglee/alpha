@@ -1,4 +1,5 @@
 from typing import Dict, List
+from datetime import datetime as dt
 
 import pandas as pd
 import psycopg2
@@ -54,6 +55,8 @@ class AlphaDB:
                    start_date: str = '2023_01_01', end_date: str = '3000_00_00',
                    except_etn: bool = False, only_ohlcv: bool = False) -> pd.DataFrame:
         """Return stock data in table"""
+        start_date = start_date.strftime('%Y%m%d') if isinstance(start_date, dt) else start_date
+        end_date = end_date.strftime('%Y%m%d') if isinstance(end_date, dt) else end_date
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
 
@@ -62,6 +65,7 @@ class AlphaDB:
         cond_code = f"AND sh7code IN ('{code}')" if code != 'all' else ''
         cond_not_etn = "AND (sh7code NOT LIKE 'Q%')" if except_etn else ''
         cond_only_ohlcv = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
+        cond_only_ohlcv = cond_only_ohlcv if table_name.split('_')[-1] == 'daily' else 'cddt,' + cond_only_ohlcv
 
         sql = f"""
         SELECT {cond_only_ohlcv} FROM {table_name} 
@@ -72,6 +76,34 @@ class AlphaDB:
         """
         df = pd.read_sql(sql, self.conn)
         return df
+    
+    def get_date_Ndays_ago(self, today: str, N: int) -> str:
+        """Return date Ndays ago"""
+        today = today.strftime('%Y%m%d') if isinstance(today, dt) else today
+        today = int(re.sub(r'[^0-9]', '', today))
+        with self.conn.cursor() as curs:
+            sql = f"""
+            SELECT DISTINCT dateint FROM cpstore_adjchart_daily
+            WHERE dateint < {today}
+            ORDER BY dateint DESC
+            LIMIT 1 OFFSET {N-1}
+            """
+            curs.execute(sql)
+            res = curs.fetchone()
+            date = str(res[0])
+            return f'{date[:4]}-{date[4:6]}-{date[6:]}'
+    
+    def get_krx_closed_bday(self) -> List[str]:
+        """Return KRX closed days except weekends"""
+        with self.conn.cursor() as curs:
+            sql = f"""
+            SELECT json_data FROM common_jsonstore
+            WHERE key = 'krx_closed_bday_li'
+            ;
+            """
+            curs.execute(sql)
+            res = curs.fetchone()
+        return res[0]
 
     @staticmethod
     def trans_qis_daily_format(daily_df: pd.DataFrame, only_ohlcv: bool = False, filter_out_etn: bool = False,
