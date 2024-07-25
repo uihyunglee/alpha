@@ -48,18 +48,22 @@ def show_rtn_plot(strategy_rtn, benchmark_rtn=None, benchmark_price=None, func='
     stg_rtn_data[f'{func}_dd'].plot(ax=ax[1], grid=True, color = 'b');
     
 
-def show_monthly_rtn_plot(strategy_rtn):
-    monthly_df = pd.DataFrame(strategy_rtn).copy()
-    monthly_df['year'] = strategy_rtn.index.map(lambda d: d.year)
-    monthly_df['month'] = strategy_rtn.index.map(lambda d: d.month)
+def show_monthly_rtn_plot(stg_rtn):
+    monthly_df = pd.DataFrame(stg_rtn).copy()
+    monthly_df['year'] = stg_rtn.index.year
+    monthly_df['month'] = stg_rtn.index.month
 
-    monthly_rtn = monthly_df.groupby(['year','month'])[0].apply(lambda r: ((1+r).prod()-1)*100)
+    monthly_rtn = monthly_df.groupby(['year','month'])[stg_rtn.name].apply(
+        lambda r: ((1+r).prod()-1)*100
+    )
     monthly_rtn = pd.DataFrame(monthly_rtn)
 
-    heat_df = pd.pivot_table(data=pd.DataFrame(monthly_rtn), values=0, index='year', columns='month')
+    heat_df = pd.pivot_table(data=pd.DataFrame(monthly_rtn),
+                             values=stg_rtn.name,
+                             index='year', columns='month')
     
     plt.title('월별 수익률 (복리 기준)')
-    sns.heatmap(heat_df, annot=True, fmt='.2f', cmap='coolwarm', linewidths=0.5);
+    sns.heatmap(heat_df, annot=True, fmt='.2f', cmap='coolwarm', linewidths=0.5).grid(False);
 
 
 def show_rtn_analysis(strategy_rtn, benchmark_rtn=None, benchmark_price=False):
